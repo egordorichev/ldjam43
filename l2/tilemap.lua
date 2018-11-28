@@ -10,12 +10,10 @@ function Tile:new(image, size, index)
 	self.moves = false
 	self.immovable = true
 	self.id = "tile"
-	self.solid = true
 end
 
 function Tile:setSlope(left, right, side)
 	side = side or "top"
-
 	assert(side == "top" or side == "bottom", "expected 'top' or 'bottom' as side")
 
 	self.solid = false
@@ -85,15 +83,15 @@ function Tilemap:loadMetaImage(filename, map)
 		error("tile image and meta image dimensions mismatch")
 	end
 
-	for i, t in ipairs(self.tiles) do
-		local xtiles = meta:getWidth() / ts
-		local px = ((i - 1) % xtiles)
-		local py = math.floor((i - 1) / xtiles)
+	local xtiles = meta:getWidth()
 
-		if px < w and py < h then
-			local clr = string.format("#%02x%02x%02x", meta:getPixel(px, py))
-			lume.call(map[clr], t, i)
-		end
+	for i, t in ipairs(self.tiles) do
+		local px = ((i - 1) % xtiles)
+		local py = math.floor((i - 1) / ts)
+
+		local r, g, b = meta:getPixel(px, py)
+		local clr = string.format("#%02x%02x%02x", r * 255, g * 255, b * 255)
+		lume.call(map[clr], t, i)
 	end
 end
 

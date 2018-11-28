@@ -12,11 +12,11 @@ function InGameState:init()
 	map:loadLua("data/maps/1.lua", lume.fn(self.loadObject, self))
 
 	map:loadMetaImage("data/images/meta.png", {
-		["#000000"] = function(t)
-			log.info("solid tile")
+		["#ffffff"] = function(t)
 			t.solid = true
 			t.static = true
 			t.immovable = true
+			print(t.id)
 		end
 	})
 
@@ -24,11 +24,12 @@ function InGameState:init()
 end
 
 function InGameState:loadObject(layer, obj)
-	self.scene:destroy()
+	print("Detected object obj")
 end
 
 function InGameState:destroy()
 	InGameState.super.destroy(self)
+	self.scene:destroy()
 end
 
 function InGameState:update(dt)

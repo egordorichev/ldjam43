@@ -25,7 +25,7 @@ function Camera:update(dt)
       self.x = lume.lerp(self.x, self.follow:centerX() - self.w / 2, self.speed * dt)
 
 			if self.follow.velocity.y > 128 or self.follow.touching.bottom then
-      	self.y = lume.lerp(self.y, self.follow:centerY() - self.h / 2, self.speed * dt)
+      	self.y = lume.lerp(self.y, self.follow:centerY() - self.h / 2, self.speed * 3 * dt)
 			end
     end
   end
