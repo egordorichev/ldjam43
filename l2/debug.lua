@@ -1,5 +1,5 @@
 Debug = {
-	active = false,
+	active = true,
   enable = true
 }
 
@@ -83,6 +83,14 @@ end
 local status
 local filter = ""
 
+local old_print = print
+local history = {}
+
+function print(s)
+	old_print(s)
+	table.insert(history, tostring(s))
+end
+
 function Debug.draw()
 	if not Debug.active then
 		return
@@ -90,11 +98,25 @@ function Debug.draw()
 
 	imgui.NewFrame()
 
+	if imgui.Begin("Log") then
+		for _, v in pairs(history) do
+			imgui.Text(v)
+		end
+
+		imgui.End()
+	end
+
 	if imgui.Begin("Debug") then
 		imgui.Text(love.timer.getFPS() .. " FPS")
 		imgui.Text("Draw calls: " .. game.drawCalls)
 		imgui.Text("Entities: " .. game.state.scene.sh:info("entities"))
 		imgui.Text("State: " .. game.state.name)
+
+		if imgui.Button("Reload state") then
+			game.state:destroy()
+			game.state:init()
+		end
+
 		imgui.End()
 	end
 

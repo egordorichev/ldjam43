@@ -8,6 +8,7 @@ function Entity:new(options)
 	self.accel = Point()
 	self.maxVelocity = Point(256, 256)
 	self.drag = Point()
+	self.offset = Point()
 	self.moves = false
 
 	self.angle = 0
@@ -17,6 +18,7 @@ function Entity:new(options)
 	self.immovable = false
 	self.solid = false
 	self.touching = {}
+	self.bounce = 0
 
 	self.dead = false
 	self.zIndex = 0
@@ -226,6 +228,8 @@ function Entity:getNearbyEntities(maxDistance, filter)
 end
 
 function Entity:onOverlap(e)
+	-- print(e.id .. (e.solid and "t" or "f") .. " " .. self.id .. (self.solid and "t" or "f"))
+
 	if self.solid and e.solid then
 		self:separate(e)
 	end
@@ -400,7 +404,7 @@ function Entity:playSound(filename, gain, always)
 		return
 	end
 
-	Rect.clone(self, self.last)
+	self:clone(self.last)
 
 	self.velocity.x = self.velocity.x + self.accel.x * dt
 	self.velocity.y = self.velocity.y + self.accel.y * dt
@@ -540,7 +544,7 @@ end
 end
 
 function Entity:getDrawArgs()
-	return self.frames[self.frame], self.x, self.y, math.rad(self.angle)
+	return self.frames[self.frame], self.x + self.offset.x, self.y + self.offset.y, math.rad(self.angle)
 end
 
 function Entity:getDrawColorArgs()
@@ -588,8 +592,14 @@ function Entity:draw()
 
 	love.graphics.draw(self.image, self:getDrawArgs())
 
+	if Debug.active then
+		love.graphics.setColor(1, 0.5, 0.5, 1)
+		love.graphics.rectangle("line", self.x, self.y, self.w, self.h)
+		colorSet = true
+	end
+
 	if colorSet then
-		love.graphics.setColor(1, 1, 1)
+		love.graphics.setColor(1, 1, 1, 1)
 	end
 
 	love.graphics.setShader(s)

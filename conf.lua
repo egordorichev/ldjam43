@@ -1,4 +1,4 @@
-SCALE = 2
+SCALE = 3
 WIDTH = 320
 HEIGHT = 180
 

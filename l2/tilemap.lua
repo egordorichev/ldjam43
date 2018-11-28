@@ -9,8 +9,8 @@ function Tile:new(image, size, index)
 	self.last = self
 	self.moves = false
 	self.immovable = true
-
-  self.id = "tilemap"
+	self.id = "tile"
+	self.solid = true
 end
 
 function Tile:setSlope(left, right, side)
@@ -71,24 +71,29 @@ function Tilemap:new()
 	self.solid = false
 	self.static = true
 	self.zIndex = -1
+  self.id = "tilemap"
 end
 
 function Tilemap:loadMetaImage(filename, map)
 	local meta = love.image.newImageData(filename)
 	assert(self.tiles, "expected tilemap to be loaded")
+	local ts = self.tileSize
+	local w = meta:getWidth()
+	local h = meta:getHeight()
 
-	if self.tiles[1].image:getWidth() ~= meta:getWidth() or self.tiles[1].image:getHeight() ~= meta:getHeight()	then
+	if self.tiles[1].image:getWidth() ~= w * ts or self.tiles[1].image:getHeight() ~= h * ts	then
 		error("tile image and meta image dimensions mismatch")
 	end
 
 	for i, t in ipairs(self.tiles) do
-		local ts = self.tileSize
 		local xtiles = meta:getWidth() / ts
-		local px = ts * ((i - 1) % xtiles)
-		local py = ts * math.floor((i - 1) / xtiles)
-		local clr = string.format("#%02x%02x%02x", meta:getPixel(px, py))
+		local px = ((i - 1) % xtiles)
+		local py = math.floor((i - 1) / xtiles)
 
-		lume.call( map[clr], t, i )
+		if px < w and py < h then
+			local clr = string.format("#%02x%02x%02x", meta:getPixel(px, py))
+			lume.call(map[clr], t, i)
+		end
 	end
 end
 
@@ -102,9 +107,10 @@ function Tilemap:loadArray(array, width, imageFile, tileSize)
 	self.heightInTiles = #array / width
 	self.tileSize = tileSize
 	self.tiles = {}
+	self.image = Assets.load(imageFile)
 
 	for i = 1, math.huge do
-		local tile = Tile(imageFile, tileSize, i)
+		local tile = Tile(self.image, tileSize, i)
 		table.insert(self.tiles, tile)
 
 		if i == #tile.frames then
@@ -124,7 +130,8 @@ function Tilemap:loadLua(filename, objHandler, tileLayer)
 	local image = self.tileset.image:gsub("%.%.", "data")
 	local tilemap = t.layers[1]
 
-	self.tileSize = self.tileset.tilewidth
+	self.tileSize = self.tileset.tilewidth or 16
+
 	self.data = {}
 
 	if tileLayer then
@@ -215,11 +222,9 @@ end
 
 function Tilemap:update(dt)
 	Tilemap.super.update(self, dt)
-	lume.each(self.tiles, "update", dt)
+	-- lume.each(self.tiles, "update", dt)
 end
 
 function Tilemap:draw()
 	self:eachOverlappingTile(game.state.scene.camera, Entity.draw)
 end
-
-map = Tilemap()

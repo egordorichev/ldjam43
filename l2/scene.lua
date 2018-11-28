@@ -9,7 +9,9 @@ function Scene:new(cellsize)
 end
 
 function Scene:destroy()
-
+	for _, e in pairs(self.entities) do
+		self:remove(e)
+	end
 end
 
 function Scene:add(e)
@@ -24,14 +26,14 @@ function Scene:add(e)
 end
 
 function Scene:remove(e)
-    assert(e, "Expected entity")
-    assert(e.scene == self, "Entity is in another scene")
+  assert(e, "Expected entity")
+  assert(e.scene == self, "Entity is in another scene")
 
-    lume.remove(self.entities, e)
+  lume.remove(self.entities, e)
 	self.sh:remove(e)
 
-    e.scene = nil
-    e:onRemove()
+  e.scene = nil
+  e:onRemove()
 end
 
 local function identity(...)

@@ -1,4 +1,5 @@
-require "lib.autobatch"
+-- no love 11.2 support yet
+-- require "lib.autobatch"
 
 flux = require "lib.flux"
 lume = require "lib.lume"

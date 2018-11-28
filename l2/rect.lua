@@ -23,7 +23,7 @@ function Rect:get(expand)
 end
 
 function Rect:clone(r)
-	dest = dest or Rect()
+	dest = r or Rect()
 
 	dest.x = self.x
 	dest.y = self.y
@@ -65,44 +65,44 @@ end
 
 function Rect:top(val)
 	if val then
-        self.y = val
-    end
+    self.y = val
+  end
 
 	return self.y
 end
 
 function Rect:bottom(val)
 	if val then
-        self.y = val - self.h
-    end
+    self.y = val - self.h
+  end
 
 	return self.y + self.h
 end
 
 function Rect:centerX(val)
 	if val then
-        self.x = val - self.w / 2
-    end
+    self.x = val - self.w / 2
+  end
 
 	return self.x + self.w / 2
 end
 
 function Rect:centerY(val)
 	if val then
-        self.y = val - self.h / 2
-    end
+    self.y = val - self.h / 2
+  end
 
 	return self.y + self.h / 2
 end
 
 function Rect:center(_x, _y)
 	if _x then
-        self.x = _x - self.w / 2
-    end
+    self.x = _x - self.w / 2
+  end
 
 	if _y then
-        self.y = _y - self.h / 2
-    end
+    self.y = _y - self.h / 2
+  end
 
 	return self.x + self.w / 2, self.y + self.h / 2
 end
@@ -113,6 +113,14 @@ end
 
 function Rect:getAngle(r)
 	return lume.angle(self:centerX(), self:centerY(), r:centerX(), r:centerY())
+end
+
+function Rect:overlapsX(r)
+  return self.x < r.x + r.w and self.x + self.w > r.x
+end
+
+function Rect:overlapsY(r)
+  return self.y < r.y + r.h and self.y + self.h > r.y
 end
 
 function Rect:_str()

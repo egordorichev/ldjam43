@@ -1,6 +1,7 @@
 Game = Object:extend()
 
 local canvas
+local shader
 
 function Game:new()
   self.state = nil
@@ -15,6 +16,26 @@ function Game:new()
 	self.flashColor = nil
 	self.backgroundColor = { 0.1, 0.1, 0.1 }
 	self.drawCalls = 0
+
+	shader = love.graphics.newShader [[
+extern float elapsed;
+
+vec2 radialDistortion(vec2 coord, float dist) {
+  vec2 cc = coord - 0.5;
+  dist = dot(cc, cc) * dist + cos(elapsed * .3) * .01;
+  return (coord + cc * (1.0 + dist) * dist);
+}
+
+vec4 effect(vec4 color, Image tex, vec2 tc, vec2 pc) {
+  vec2 tcr = radialDistortion(tc, .24)  + vec2(.001, 0);
+  vec2 tcg = radialDistortion(tc, .20);
+  vec2 tcb = radialDistortion(tc, .18) - vec2(.001, 0);
+  vec4 res = vec4(Texel(tex, tcr).r, Texel(tex, tcg).g, Texel(tex, tcb).b, 1)
+    - cos(tcg.y * 128. * 3.142 * 2) * .03
+    - sin(tcg.x * 128. * 3.142 * 2) * .03;
+  return res * Texel(tex, tcg).a;
+}
+]]
 
 	canvas = love.graphics.newCanvas(WIDTH, HEIGHT)
 	canvas:setFilter("nearest", "nearest")
@@ -68,6 +89,8 @@ function Game:update(dt)
   self.dt = dt
   self.elapsed = self.elapsed + dt
 
+	shader:send("elapsed", self.elapsed)
+
 	if self.flashTimer > 0 then
     self.flashTimer = self.flashTimer - dt
 	end
@@ -89,6 +112,7 @@ end
 function Game:draw()
 	love.graphics.setCanvas(canvas)
 	love.graphics.clear(self.backgroundColor[1], self.backgroundColor[2], self.backgroundColor[3], 255)
+	Game.camera:set()
 
 	local shake = math.max(self.shakeAmount, 0)
 	love.graphics.translate(shake * lume.random(-1, 1), shake * lume.random(-1, 1))
@@ -99,8 +123,11 @@ function Game:draw()
 		love.graphics.clear(unpack(self.flashColor))
 	end
 
+	--love.graphics.setShader(shader)
 	love.graphics.setCanvas()
+	Game.camera:unset()
 	love.graphics.draw(canvas, CX, CY, 0, SCALE, SCALE)
+	love.graphics.setShader()
 
 	Debug.draw()
 	self.drawCalls = love.graphics.getStats().drawcalls
